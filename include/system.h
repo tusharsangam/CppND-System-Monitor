@@ -7,6 +7,7 @@
 #include "process.h"
 #include "processor.h"
 
+
 class System {
  public:
   Processor& Cpu();                   // TODO: See src/system.cpp
@@ -17,11 +18,13 @@ class System {
   int RunningProcesses();             // TODO: See src/system.cpp
   std::string Kernel();               // TODO: See src/system.cpp
   std::string OperatingSystem();      // TODO: See src/system.cpp
-
+  System();
   // TODO: Define any necessary private members
  private:
   Processor cpu_ = {};
   std::vector<Process> processes_ = {};
+  std::string operating_system {""};
+  std::string kernel_{""};
 };
 
 #endif
