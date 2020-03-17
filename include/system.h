@@ -25,6 +25,7 @@ class System {
   std::vector<Process> processes_ = {};
   std::string operating_system {""};
   std::string kernel_{""};
+  Processor processor;
 };
 
 #endif
