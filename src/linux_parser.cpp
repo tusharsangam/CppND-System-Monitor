@@ -1,14 +1,17 @@
 #include <dirent.h>
-#include <unistd.h>
 #include <string>
 #include <vector>
 
+
 #include "linux_parser.h"
 #include "processor.h"
+#include "system.h"
 using std::stof;
 using std::string;
 using std::to_string;
 using std::vector;
+
+
 
 // DONE: An example of how to read data from the filesystem
 string LinuxParser::OperatingSystem() {
@@ -112,7 +115,60 @@ long LinuxParser::ActiveJiffies() { return 0; }
 // TODO: Read and return the number of idle jiffies for the system
 long LinuxParser::IdleJiffies() { return 0; }
 
+int LinuxParser::procs::total_procs;
+int LinuxParser::procs::active_procs;
 
+float LinuxParser::ProcessorUtilization(long& prev_total, long& prev_idle){
+  std::ifstream stream(LinuxParser::kProcDirectory+LinuxParser::kStatFilename);
+    std::string line, ignore;
+    long int user, nice, system, idle, iowait,irq, softirq, steal, guest, guest_nice, nonidletime, totald, idled, totaltime;
+    float percent{0.0f};     
+    if(stream.is_open()){
+        std::getline(stream, line); 
+        std::istringstream iss(line);
+        //std::cout << line<<std::endl;
+
+        iss >> ignore >>  user >>  nice >>  system >>  idle >>  iowait >> irq >>  softirq >>  steal >>  guest >>  guest_nice;
+        
+        while(std::getline(stream, line)){
+          if((int)line.find("processes") > -1){
+            std::istringstream iss(line);
+            iss>> ignore >> LinuxParser::procs::total_procs;
+            std::getline(stream, line);
+            
+            if((int)line.find("procs_running") > -1){
+              std::istringstream iss(line);
+              iss>> ignore >> LinuxParser::procs::active_procs;
+              break;            
+            }
+          }
+        }
+         user -=  guest;
+         nice -=  guest_nice;
+         idle +=  iowait;
+         system +=  irq+softirq;
+         guest +=   guest_nice;
+
+        //std:: cout << user << " " << nice << " " <<  idle << " " << system << " "<< guest << std::endl;
+         nonidletime =  user +  nice +  system +  steal +   guest;
+        
+         totaltime =  nonidletime +  idle;
+
+         totald =  totaltime - prev_total;
+         idled =  idle - prev_idle;
+
+       
+
+        percent = ( totald -  idled) / float( totald);
+
+
+         //std::cout << percent<< " " << totald-idled << " "<< totald<<std::endl;
+
+        prev_total =  totaltime ;
+        prev_idle =  idle;       
+    }
+    return percent;
+}
 
 
 
@@ -238,11 +294,14 @@ long getfulltime(){
 
 //#include<iostream>
 // TODO: Read and return CPU utilization
-void LinuxParser::CpuUtilization(int& pid, float& utilization, long& prev_proctime, long& prev_cpu_usage) { 
+
+
+long Hertz = sysconf(_SC_CLK_TCK);
+void LinuxParser::CpuUtilization(int& pid, float& utilization, long& prev_proctime) { 
   std::ifstream stream(LinuxParser::kProcDirectory+std::to_string(pid)+LinuxParser::kStatFilename);
   std::string line, ignorestr;
   long utime, stime, cutime, cstime, starttime, ignore, uptime;
-  //float HERTZ = (float)sysconf(_SC_CLK_TCK);
+  
   
   if(stream.is_open()){
     std::getline(stream, line);
@@ -264,24 +323,25 @@ void LinuxParser::CpuUtilization(int& pid, float& utilization, long& prev_procti
       i++;
     }
     
-    long Hertz = sysconf(_SC_CLK_TCK);
+    
 
-    uptime = LinuxParser::UpTime();//Processor::idle +  Processor::user + Processor::system + Processor::idle + Processor::iowait + Processor::irq + Processor::softirq + Processor::steal + Processor::guest + Processor::guest_nice;
+    //Processor::idle +  Processor::user + Processor::system + Processor::idle + Processor::iowait + Processor::irq + Processor::softirq + Processor::steal + Processor::guest + Processor::guest_nice;
+    
+    uptime = System::uptime;
     
     long total_time =  utime +stime +cutime + cstime;
 
-    //long backup = total_time;
-    //total_time -= prev_proctime;
     
-    long seconds = uptime  - (starttime / float(Hertz));
-
-    total_time /= float(Hertz); 
-
-    utilization = (100.0* (total_time/float(Hertz))/ float( seconds ));
+    starttime = starttime/float(Hertz);
     
 
-    prev_proctime = total_time;
-    prev_cpu_usage = seconds;
+     
+
+    utilization = (100.0* (total_time/Hertz)/ float(uptime  - starttime) );
+    
+
+    prev_proctime = starttime;
+    //prev_cpu_usage = seconds;
     
     //std::cout << line << std::endl;
     //std::cout << utime << " "<< stime << " "<< cutime << " "<<  cstime << " "<< starttime << " "<<std::endl;

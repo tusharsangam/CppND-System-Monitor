@@ -26,7 +26,8 @@ class Process {
  std::string command;
  std::string user;
  long int uptime{0};
- long int systemuptime{0};
+ 
+
 
 };
 
