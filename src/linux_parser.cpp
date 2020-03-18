@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "linux_parser.h"
-//#include "process.h"
+#include "processor.h"
 using std::stof;
 using std::string;
 using std::to_string;
@@ -112,8 +112,7 @@ long LinuxParser::ActiveJiffies() { return 0; }
 // TODO: Read and return the number of idle jiffies for the system
 long LinuxParser::IdleJiffies() { return 0; }
 
-// TODO: Read and return CPU utilization
-vector<string> LinuxParser::CpuUtilization() { return {}; }
+
 
 
 
@@ -222,7 +221,65 @@ void LinuxParser::User(std::string& uid, std::string& username) {
 
 // TODO: Read and return the uptime of a process
 // REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::UpTime(int pid [[maybe_unused]]) {
-   return 0; 
-}
+long getfulltime(){
+    std::ifstream stream(LinuxParser::kProcDirectory+LinuxParser::kStatFilename);
+    std::string line, ignore;
+    long int user, nice, system, idle, iowait,irq, softirq, steal, guest, guest_nice;
+     
+    if(stream.is_open()){
+        std::getline(stream, line); 
+        std::istringstream iss(line);
+    
+        iss >> ignore >>  user >>  nice >>  system >>  idle >>  iowait >> irq >>  softirq >>  steal >>  guest >>  guest_nice;
+    }
+    return user +  nice +  system +  idle ;
 
+  }
+
+//#include<iostream>
+// TODO: Read and return CPU utilization
+void LinuxParser::CpuUtilization(int& pid, float& utilization, long& prev_proctime, long& prev_cpu_usage) { 
+  std::ifstream stream(LinuxParser::kProcDirectory+std::to_string(pid)+LinuxParser::kStatFilename);
+  std::string line, ignorestr;
+  long utime, stime, cutime, cstime, starttime, ignore, uptime;
+  //float HERTZ = (float)sysconf(_SC_CLK_TCK);
+  
+  if(stream.is_open()){
+    std::getline(stream, line);
+    //14,15,16,17, 22
+    std::istringstream iss(line);
+    iss >> ignore >> ignorestr >> ignorestr ;
+   
+    size_t i = 4;
+    while(i < 23){ 
+      if(i == 14){
+        iss >> utime >> stime >> cutime >> cstime;
+         i = 17;
+      }else if(i == 22){
+        iss >> starttime;
+        break;
+      }else{
+         iss >> ignore;
+      }
+      i++;
+    }
+    
+    long Hertz = sysconf(_SC_CLK_TCK);
+
+    uptime = LinuxParser::UpTime();//Processor::idle +  Processor::user + Processor::system + Processor::idle + Processor::iowait + Processor::irq + Processor::softirq + Processor::steal + Processor::guest + Processor::guest_nice;
+    
+    long total_time =  utime +stime +cutime + cstime;
+    
+    long seconds = uptime - (starttime / float(Hertz));
+
+    utilization = (100.0* (total_time/float(Hertz))/ float(seconds));
+    
+
+    prev_proctime = total_time;
+    prev_cpu_usage = uptime;
+    
+    //std::cout << line << std::endl;
+    //std::cout << utime << " "<< stime << " "<< cutime << " "<<  cstime << " "<< starttime << " "<<std::endl;
+    
+  }
+ }

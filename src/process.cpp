@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+
 #include "process.h"
 #include "linux_parser.h"
 
@@ -33,7 +34,7 @@ void Process::setUser(){
 int Process::Pid() { return pid; }
 
 // TODO: Return this process's CPU utilization
-float Process::CpuUtilization() { return 0; }
+float Process::CpuUtilization() { float utilization{0.0f}; LinuxParser::CpuUtilization(pid, utilization, uptime, systemuptime);  return utilization; }
 
 // TODO: Return the command that generated this process
 string Process::Command() { return command; }
@@ -45,8 +46,14 @@ string Process::Ram() { long memsize{0}; LinuxParser::Ram(pid, memsize);  return
 string Process::User() { return user; }
 
 // TODO: Return the age of this process (in seconds)
-long int Process::UpTime() { return LinuxParser::UpTime(pid); }
+long int Process::UpTime() { return uptime/sysconf(_SC_CLK_TCK); }
 
 // TODO: Overload the "less than" comparison operator for Process objects
 // REMOVE: [[maybe_unused]] once you define the function
-bool Process::operator<(Process const& a[[maybe_unused]]) const { return true; }
+bool Process::operator<(Process& a) {
+      return (this->CpuUtilization() > a.CpuUtilization());
+};
+
+bool Process::operator>(Process& a) {
+      return (this->CpuUtilization() < a.CpuUtilization());
+};

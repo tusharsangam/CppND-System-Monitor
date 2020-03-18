@@ -3,6 +3,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "process.h"
 #include "processor.h"
@@ -26,6 +27,8 @@ Processor& System::Cpu() { return processor; }
 vector<Process>& System::Processes() {  
     processes_.reserve(50);
     LinuxParser::Pids(processes_);
+    //sort the processes
+    std::sort(processes_.begin(), processes_.end());
     return processes_;   
 }
 

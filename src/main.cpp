@@ -9,6 +9,10 @@ int main() {
   //   std::cout<<system.Cpu().Utilization()<<std::endl;
   //   std::cin.get();
   // }
+  // for ( Process& p : system.Processes())
+  // {
+  //  std::cout << p.CpuUtilization() << std::endl;
+  // }
   
   
   NCursesDisplay::Display(system);
