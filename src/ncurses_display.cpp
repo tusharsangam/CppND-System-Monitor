@@ -69,6 +69,7 @@ void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes,
   mvwprintw(window, row, time_column, "TIME+");
   mvwprintw(window, row, command_column, "COMMAND");
   wattroff(window, COLOR_PAIR(2));
+  
   for (int i = 0; i < n; ++i) {
     mvwprintw(window, ++row, pid_column, to_string(processes[i].Pid()).c_str());
     mvwprintw(window, row, user_column, processes[i].User().c_str());
@@ -99,7 +100,9 @@ void NCursesDisplay::Display(System& system, int n) {
     box(system_window, 0, 0);
     box(process_window, 0, 0);
     DisplaySystem(system, system_window);
+    
     DisplayProcesses(system.Processes(), process_window, n);
+    scrollok(process_window, TRUE);
     wrefresh(system_window);
     wrefresh(process_window);
     refresh();

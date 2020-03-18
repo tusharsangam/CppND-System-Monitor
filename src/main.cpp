@@ -15,5 +15,5 @@ int main() {
   // }
   
   
-  NCursesDisplay::Display(system);
+  NCursesDisplay::Display(system, 15);
 }

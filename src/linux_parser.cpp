@@ -269,14 +269,19 @@ void LinuxParser::CpuUtilization(int& pid, float& utilization, long& prev_procti
     uptime = LinuxParser::UpTime();//Processor::idle +  Processor::user + Processor::system + Processor::idle + Processor::iowait + Processor::irq + Processor::softirq + Processor::steal + Processor::guest + Processor::guest_nice;
     
     long total_time =  utime +stime +cutime + cstime;
-    
-    long seconds = uptime - (starttime / float(Hertz));
 
-    utilization = (100.0* (total_time/float(Hertz))/ float(seconds));
+    //long backup = total_time;
+    //total_time -= prev_proctime;
+    
+    long seconds = uptime  - (starttime / float(Hertz));
+
+    total_time /= float(Hertz); 
+
+    utilization = (100.0* (total_time/float(Hertz))/ float( seconds ));
     
 
     prev_proctime = total_time;
-    prev_cpu_usage = uptime;
+    prev_cpu_usage = seconds;
     
     //std::cout << line << std::endl;
     //std::cout << utime << " "<< stime << " "<< cutime << " "<<  cstime << " "<< starttime << " "<<std::endl;
