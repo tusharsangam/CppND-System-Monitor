@@ -1,7 +1,7 @@
 #include <dirent.h>
 #include <string>
 #include <vector>
-
+#include <signal.h>
 
 #include "linux_parser.h"
 #include "processor.h"
@@ -49,6 +49,9 @@ string LinuxParser::Kernel() {
   return kernel;
 }
 
+bool LinuxParser::isRunning(int pid){
+  return 0 == kill(pid, 0);
+}
 // BONUS: Update this to use std::filesystem
 void LinuxParser::Pids(std::vector<Process>& processes) {
   DIR* directory = opendir(LinuxParser::kProcDirectory.c_str());
@@ -59,8 +62,11 @@ void LinuxParser::Pids(std::vector<Process>& processes) {
       // Is every character of the name a digit?
       string filename(file->d_name);
       if (std::all_of(filename.begin(), filename.end(), isdigit)) {
-        //int pid = ;
-        processes.emplace_back(stoi(filename));
+        int pid = stoi(filename);
+        if(LinuxParser::isRunning(pid)){
+          processes.emplace_back(pid);
+        }
+        
       }
     }
   }

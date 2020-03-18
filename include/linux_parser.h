@@ -49,6 +49,7 @@ long ActiveJiffies(int pid);
 long IdleJiffies();
 
 // Processes
+bool isRunning(int pid);
 std::string Command(int pid);
 void Ram(int pid, long& memsize);
 void Uid(int pid, std::string& uid);
