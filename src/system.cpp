@@ -23,7 +23,11 @@ System::System(){
 Processor& System::Cpu() { return processor; }
 
 // TODO: Return a container composed of the system's processes
-vector<Process>& System::Processes() { return processes_; }
+vector<Process>& System::Processes() {  
+    processes_.reserve(50);
+    LinuxParser::Pids(processes_);
+    return processes_;   
+}
 
 // TODO: Return the system's kernel identifier (string)
 std::string System::Kernel() { return kernel_; }

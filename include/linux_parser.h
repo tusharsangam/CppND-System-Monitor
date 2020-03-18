@@ -4,6 +4,7 @@
 #include <fstream>
 #include <regex>
 #include <string>
+#include "process.h"
 
 namespace LinuxParser {
 // Paths
@@ -21,7 +22,7 @@ const std::string kPasswordPath{"/etc/passwd"};
 // System
 float MemoryUtilization();
 long UpTime();
-std::vector<int> Pids();
+void Pids(std::vector<Process>& processes);
 int TotalProcesses();
 int RunningProcesses();
 std::string OperatingSystem();
@@ -48,10 +49,11 @@ long IdleJiffies();
 
 // Processes
 std::string Command(int pid);
-std::string Ram(int pid);
-std::string Uid(int pid);
-std::string User(int pid);
+void Ram(int pid, long& memsize);
+void Uid(int pid, std::string& uid);
+void User(std::string& uid, std::string& username);
 long int UpTime(int pid);
+int ExtractProcessStatus(int pid, long& uid, long& memsize);
 };  // namespace LinuxParser
 
 #endif
