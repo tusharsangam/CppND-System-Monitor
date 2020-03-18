@@ -42,14 +42,5 @@ int System::TotalProcesses() { return LinuxParser::TotalProcesses(); }
 
 // TODO: Return the number of seconds since the system started running
 long int System::UpTime() { 
-    std::ifstream stream(LinuxParser::kProcDirectory+LinuxParser::kUptimeFilename);
-    std::string line; 
-    long int uptime{0};
-    if(stream.is_open()){
-      std::getline(stream, line);
-      std::istringstream iss(line);
-      iss >> uptime;
-      //return uptime;
-    }
-    return uptime;
+    return LinuxParser::UpTime();
  }
