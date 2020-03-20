@@ -5,6 +5,7 @@
 #include <regex>
 #include <string>
 #include <unistd.h>
+
 #include "process.h"
 
 namespace LinuxParser {
@@ -58,7 +59,7 @@ void User(std::string& uid, std::string& username);
 void CpuUtilization(int& pid, float& utilization, long& uptime);
 //float Hertz = (float)sysconf(_SC_CLK_TCK);
 float ProcessorUtilization(long& prev_total, long& prev_idle);
-
+long findProcessUptime(int pid);
 struct procs{
   static int active_procs, total_procs;
 };

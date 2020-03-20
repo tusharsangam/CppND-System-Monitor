@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <signal.h>
+#include <unordered_map>
 
 #include "linux_parser.h"
 #include "processor.h"
@@ -54,6 +55,7 @@ bool LinuxParser::isRunning(int pid){
 }
 // BONUS: Update this to use std::filesystem
 void LinuxParser::Pids(std::vector<Process>& processes) {
+  processes.clear();
   DIR* directory = opendir(LinuxParser::kProcDirectory.c_str());
   struct dirent* file;
   while ((file = readdir(directory)) != nullptr) {
@@ -64,7 +66,8 @@ void LinuxParser::Pids(std::vector<Process>& processes) {
       if (std::all_of(filename.begin(), filename.end(), isdigit)) {
         int pid = stoi(filename);
         if(LinuxParser::isRunning(pid)){
-          processes.emplace_back(pid);
+            processes.emplace_back(pid);
+
         }
         
       }
@@ -300,9 +303,32 @@ long getfulltime(){
 
 //#include<iostream>
 // TODO: Read and return CPU utilization
-
-
 long Hertz = sysconf(_SC_CLK_TCK);
+long LinuxParser::findProcessUptime(int pid){
+  std::ifstream stream(LinuxParser::kProcDirectory+std::to_string(pid)+LinuxParser::kStatFilename);
+  std::string line, ignorestr;
+  long uptime, ignore;
+  
+  
+  if(stream.is_open()){
+    std::getline(stream, line);
+    //14,15,16,17, 22
+    std::istringstream iss(line);
+    iss >> ignore >> ignorestr >> ignorestr;
+    size_t i = 4;
+    while(i < 23){ 
+      if(i == 22){
+        iss >> uptime;
+        return uptime/Hertz;
+      }else{
+         iss >> ignore;
+      }
+      i++;
+    }
+  }
+}
+
+
 void LinuxParser::CpuUtilization(int& pid, float& utilization, long& prev_proctime) { 
   std::ifstream stream(LinuxParser::kProcDirectory+std::to_string(pid)+LinuxParser::kStatFilename);
   std::string line, ignorestr;
@@ -333,7 +359,7 @@ void LinuxParser::CpuUtilization(int& pid, float& utilization, long& prev_procti
 
     //Processor::idle +  Processor::user + Processor::system + Processor::idle + Processor::iowait + Processor::irq + Processor::softirq + Processor::steal + Processor::guest + Processor::guest_nice;
     
-    uptime = System::uptime;
+    uptime = LinuxParser::UpTime();
     
     long total_time =  utime +stime +cutime + cstime;
 

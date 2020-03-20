@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+
 #include "process.h"
 #include "processor.h"
 
@@ -20,11 +21,13 @@ class System {
   std::string Kernel();               // TODO: See src/system.cpp
   std::string OperatingSystem();      // TODO: See src/system.cpp
   System();
+  std::vector<Process> processes_;
   
   // TODO: Define any necessary private members
  private:
   Processor cpu_ = {};
-  std::vector<Process> processes_ = {};
+  
+  
   std::string operating_system {""};
   std::string kernel_{""};
   Processor processor;

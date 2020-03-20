@@ -3,6 +3,7 @@
 //#include<iostream>
 int main() {
   System system;
+  system.processes_.reserve(150);
   
   //  for ( Process& p : system.Processes())
   // {
@@ -12,5 +13,5 @@ int main() {
 
   
   
-  NCursesDisplay::Display(system, 20);
+  NCursesDisplay::Display(system, 30);
 }

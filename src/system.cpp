@@ -25,7 +25,7 @@ Processor& System::Cpu() { return processor; }
 
 // TODO: Return a container composed of the system's processes
 vector<Process>& System::Processes() {  
-    processes_.reserve(50);
+    
     LinuxParser::Pids(processes_);
     //sort the processes
     std::sort(processes_.begin(), processes_.end());

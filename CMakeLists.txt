@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.6)
 project(monitor)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 find_package(Curses REQUIRED)
 include_directories(${CURSES_INCLUDE_DIRS})
 
